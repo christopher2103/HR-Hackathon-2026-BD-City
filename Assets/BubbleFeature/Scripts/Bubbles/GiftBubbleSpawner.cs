@@ -6,7 +6,8 @@ using BubbleFeature.Gifts;
 namespace BubbleFeature.Bubbles
 {
     /// <summary>
-    /// Spawns a personal gift bubble in the distance that flies toward the player.
+    /// Spawns a personal gift bubble in the distance that flies toward the player,
+    /// and shows the gift reveal when that bubble pops.
     /// Test input: A button (right controller) or G key spawns a new bubble.
     /// </summary>
     public class GiftBubbleSpawner : MonoBehaviour
@@ -15,6 +16,11 @@ namespace BubbleFeature.Bubbles
         [SerializeField] private GiftBubble bubblePrefab;
         [Tooltip("Gifts handed out in order, one per bubble.")]
         [SerializeField] private GiftData[] gifts;
+
+        [Header("Reveal")]
+        [Tooltip("Shown where the bubble popped. Leave empty to skip the reveal.")]
+        [SerializeField] private GiftReveal revealPrefab;
+        [SerializeField] private float revealHeightOffset = 0.1f; // a bit higher than the bubble was
 
         [Header("Where")]
         [Tooltip("Leave empty to use Camera.main (the headset).")]
@@ -30,7 +36,10 @@ namespace BubbleFeature.Bubbles
 
         private InputAction spawnAction;
         private GiftBubble current;
+        private GiftReveal currentReveal;
         private int nextGiftIndex;
+
+        private Transform Player => player != null ? player : (Camera.main != null ? Camera.main.transform : null);
 
         private void Awake()
         {
@@ -56,7 +65,7 @@ namespace BubbleFeature.Bubbles
         [ContextMenu("Spawn bubble")]
         public void Spawn()
         {
-            Transform p = player != null ? player : (Camera.main != null ? Camera.main.transform : null);
+            Transform p = Player;
             if (p == null)    { Debug.LogWarning("[Bubble] No player/camera found.", this); return; }
             if (bubblePrefab == null) { Debug.LogWarning("[Bubble] No bubble prefab assigned.", this); return; }
 
@@ -70,6 +79,7 @@ namespace BubbleFeature.Bubbles
 
             Vector3 position = p.position + direction * spawnDistance + Vector3.up * spawnHeightAboveEyes;
             current = Instantiate(bubblePrefab, position, Quaternion.identity);
+            current.Popped += OnBubblePopped;
 
             // Hand out the next gift.
             GiftData gift = null;
@@ -86,6 +96,19 @@ namespace BubbleFeature.Bubbles
             else Debug.LogWarning("[Bubble] Prefab has no GiftBubbleFlight component.", current);
 
             Debug.Log($"[Bubble] Spawned with gift: {(gift != null ? gift.name : "none")}", current);
+        }
+
+        // Show the gift where the bubble popped.
+        private void OnBubblePopped(GiftBubble bubble)
+        {
+            bubble.Popped -= OnBubblePopped;
+            if (revealPrefab == null || bubble.Gift == null) return;
+
+            if (currentReveal != null) Destroy(currentReveal.gameObject); // one reveal at a time
+
+            Vector3 position = bubble.transform.position + Vector3.up * revealHeightOffset;
+            currentReveal = Instantiate(revealPrefab, position, Quaternion.identity);
+            currentReveal.Show(bubble.Gift, Player);
         }
     }
 }

@@ -6,14 +6,17 @@ using BubbleFeature.Gifts;
 namespace BubbleFeature.Bubbles
 {
     /// <summary>
-    /// A gift bubble: a see-through shell with a glowing core that hides the gift.
-    /// Animates (shell wobble + core pulse) and can be popped.
+    /// A gift bubble: a see-through shell with a glowing rainbow core that hides the gift.
+    /// Animates (shell wobble, core pulse, slow rainbow colour) and can be popped.
     /// Input lives in separate scripts (GiftBubbleXRPop, MouseBubblePopper),
     /// so this class doesn't depend on XR.
-    /// All animation is simple scaling in code (cheap on Quest: no physics, no particles).
+    /// All animation is done in code (cheap on Quest: no physics, no particles, no Bloom).
     /// </summary>
     public class GiftBubble : MonoBehaviour
     {
+        // URP Lit/Unlit colour property.
+        private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+
         [Header("Gift")]
         [SerializeField] private GiftData gift;
 
@@ -29,15 +32,24 @@ namespace BubbleFeature.Bubbles
         [SerializeField] private float pulseAmount = 0.15f;  // 15% size change
         [SerializeField] private float pulseSpeed = 3f;
 
+        [Header("Core rainbow")]
+        [Tooltip("Core and its glow halo. Their colour cycles through the rainbow.")]
+        [SerializeField] private Renderer[] rainbowRenderers;
+        [SerializeField] private float secondsPerRainbow = 8f;    // one full colour cycle
+        [Range(0f, 1f)]
+        [SerializeField] private float rainbowSaturation = 0.6f;  // lower = softer, pastel colours
+
         [Header("Pop")]
         [SerializeField] private float popSwellScale = 1.3f; // grows 30% ...
         [SerializeField] private float popDuration = 0.12f;  // ... in this many seconds, then vanishes
 
         private Vector3 shellBaseScale;
         private Vector3 coreBaseScale;
-        private float phase; // random offset so bubbles don't wobble in sync
+        private float phase; // random offset so bubbles don't wobble or colour in sync
+        private float[] baseAlphas; // keep each material's own transparency (glow halo)
+        private MaterialPropertyBlock propertyBlock;
 
-        /// <summary>Fired once when the bubble pops. Stage 4 uses this to reveal the gift.</summary>
+        /// <summary>Fired once when the bubble pops. Used to show the gift reveal.</summary>
         public event Action<GiftBubble> Popped;
 
         /// <summary>The gift inside this bubble (null = empty bubble).</summary>
@@ -54,6 +66,16 @@ namespace BubbleFeature.Bubbles
             if (shell != null) shellBaseScale = shell.localScale;
             if (core != null) coreBaseScale = core.localScale;
             phase = UnityEngine.Random.Range(0f, 10f);
+
+            // Remember the alpha of each rainbow material (the halo is see-through).
+            propertyBlock = new MaterialPropertyBlock();
+            int count = rainbowRenderers != null ? rainbowRenderers.Length : 0;
+            baseAlphas = new float[count];
+            for (int i = 0; i < count; i++)
+            {
+                Material m = rainbowRenderers[i] != null ? rainbowRenderers[i].sharedMaterial : null;
+                baseAlphas[i] = m != null && m.HasProperty(BaseColorId) ? m.GetColor(BaseColorId).a : 1f;
+            }
         }
 
         private void Update()
@@ -72,6 +94,26 @@ namespace BubbleFeature.Bubbles
             {
                 float p = 1f + Mathf.Sin(t * pulseSpeed) * pulseAmount;
                 core.localScale = coreBaseScale * p;
+            }
+
+            UpdateRainbow(t);
+        }
+
+        // Slowly cycles the hue. Uses a property block, so all bubbles share one material.
+        private void UpdateRainbow(float t)
+        {
+            if (rainbowRenderers == null || rainbowRenderers.Length == 0) return;
+
+            float hue = Mathf.Repeat(t / secondsPerRainbow, 1f);
+            Color color = Color.HSVToRGB(hue, rainbowSaturation, 1f);
+
+            for (int i = 0; i < rainbowRenderers.Length; i++)
+            {
+                if (rainbowRenderers[i] == null) continue;
+                color.a = baseAlphas[i];
+                rainbowRenderers[i].GetPropertyBlock(propertyBlock);
+                propertyBlock.SetColor(BaseColorId, color);
+                rainbowRenderers[i].SetPropertyBlock(propertyBlock);
             }
         }
 

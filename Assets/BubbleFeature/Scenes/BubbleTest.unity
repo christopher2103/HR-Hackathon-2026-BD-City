@@ -246,6 +246,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &475140174
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 475140176}
+  - component: {fileID: 475140175}
+  m_Layer: 0
+  m_Name: Bots
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &475140175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 475140174}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 111cd70313108bf449a7aaa4e43b4502, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BubbleFeature.Bots.BotSpawner
+  botPrefab: {fileID: 7328914109536682896, guid: 4b3740f23d358d24281a86fe80a8e435, type: 3}
+  botNames:
+  - Sanne
+  - Daan
+  - Noor
+  - Milan
+  - Fatima
+  spawnRadius: 8
+  minDistanceFromPlayer: 2.5
+  surface: {fileID: 1978761694}
+  ambientBubbles: {fileID: 1370821393}
+--- !u!4 &475140176
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 475140174}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &729443161
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -341,6 +396,9 @@ MonoBehaviour:
   gifts:
   - {fileID: 11400000, guid: 70e817505c702aa449e8b01efd13678a, type: 2}
   - {fileID: 11400000, guid: dde0ccda79938fe40885343aeddad017, type: 2}
+  - {fileID: 11400000, guid: dca3e3742fac2e249a1b6926be2fc7f5, type: 2}
+  revealPrefab: {fileID: 2239037609144540630, guid: 96e129538451ae84c9b3859334e25a43, type: 3}
+  revealHeightOffset: 0.1
   player: {fileID: 0}
   spawnDistance: 8
   spawnHeightAboveEyes: 1
@@ -388,6 +446,7 @@ GameObject:
   - component: {fileID: 1171288601}
   - component: {fileID: 1171288600}
   - component: {fileID: 1171288599}
+  - component: {fileID: 1171288603}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -488,6 +547,79 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!208 &1171288603
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1171288598}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
+--- !u!1 &1370821392
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1370821394}
+  - component: {fileID: 1370821393}
+  m_Layer: 0
+  m_Name: Ambient Bubbles
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1370821393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370821392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08a7596bb0c2fa1489bc092ebf52036c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BubbleFeature.Bubbles.AmbientBubbleSpawner
+  bubblePrefab: {fileID: 738532315213900764, guid: 3cb1c2ac38582864886176c7219e596c, type: 3}
+  count: 6
+  player: {fileID: 0}
+  areaRadius: 15
+  minDistanceFromPlayer: 3
+  minTravelDistance: 5
+  spawnHeight: {x: 2.5, y: 5}
+  targetHeight: {x: 1.2, y: 2.2}
+  targets: []
+  targetHeadHeight: 2
+  targetChance: 0.6
+  respawnDelay: {x: 0.5, y: 2.5}
+  startSpread: 4
+--- !u!4 &1370821394
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370821392}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1520589273
 GameObject:
   m_ObjectHideFlags: 0
@@ -544,6 +676,7 @@ GameObject:
   - component: {fileID: 1978761692}
   - component: {fileID: 1978761691}
   - component: {fileID: 1978761690}
+  - component: {fileID: 1978761694}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -645,6 +778,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1978761694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1978761689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 2
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 0}
+  m_BuildHeightMesh: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -655,3 +820,5 @@ SceneRoots:
   - {fileID: 1171288602}
   - {fileID: 1520589275}
   - {fileID: 763702030}
+  - {fileID: 1370821394}
+  - {fileID: 475140176}
