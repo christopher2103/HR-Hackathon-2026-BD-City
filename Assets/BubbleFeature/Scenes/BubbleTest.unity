@@ -307,6 +307,75 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+--- !u!1 &763702028
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 763702030}
+  - component: {fileID: 763702029}
+  - component: {fileID: 763702031}
+  m_Layer: 0
+  m_Name: Bubble Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &763702029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763702028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a4befc5030d7a24abd5457b9e9e4751, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BubbleFeature.Bubbles.GiftBubbleSpawner
+  bubblePrefab: {fileID: 6566633532537328883, guid: 12297d9bec21e724c8e66affa73c5c54, type: 3}
+  gifts:
+  - {fileID: 11400000, guid: 70e817505c702aa449e8b01efd13678a, type: 2}
+  - {fileID: 11400000, guid: dde0ccda79938fe40885343aeddad017, type: 2}
+  player: {fileID: 0}
+  spawnDistance: 8
+  spawnHeightAboveEyes: 1
+  spawnAngleRange: 60
+  spawnOnStart: 1
+  startDelay: 1
+  onlyOneAtATime: 1
+--- !u!4 &763702030
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763702028}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.10244, y: -0, z: 10.02785}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &763702031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763702028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46954cd055c66ba49a53500f0cd2f1da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BubbleFeature.Bubbles.MouseBubblePopper
+  maxDistance: 50
 --- !u!1 &1171288598
 GameObject:
   m_ObjectHideFlags: 0
@@ -585,3 +654,4 @@ SceneRoots:
   - {fileID: 1978761693}
   - {fileID: 1171288602}
   - {fileID: 1520589275}
+  - {fileID: 763702030}
