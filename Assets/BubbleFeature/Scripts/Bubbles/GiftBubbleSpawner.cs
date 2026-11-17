@@ -20,7 +20,6 @@ namespace BubbleFeature.Bubbles
         [Header("Reveal")]
         [Tooltip("Shown where the bubble popped. Leave empty to skip the reveal.")]
         [SerializeField] private GiftReveal revealPrefab;
-        [SerializeField] private float revealHeightOffset = 0.1f; // a bit higher than the bubble was
 
         [Header("Where")]
         [Tooltip("Leave empty to use Camera.main (the headset).")]
@@ -34,7 +33,12 @@ namespace BubbleFeature.Bubbles
         [SerializeField] private float startDelay = 1f;           // wait for head tracking to settle
         [SerializeField] private bool onlyOneAtATime = true;      // remove the old bubble on respawn
 
+        [Header("Test input")]
+        [Tooltip("SpawnTestBubble from BDCityControls (rebindable). Empty = built-in A button / G key.")]
+        [SerializeField] private InputActionReference spawnActionReference;
+
         private InputAction spawnAction;
+        private bool ownsAction; // true when we created the action ourselves
         private GiftBubble current;
         private GiftReveal currentReveal;
         private int nextGiftIndex;
@@ -43,16 +47,38 @@ namespace BubbleFeature.Bubbles
 
         private void Awake()
         {
-            // Test input defined in code, so there is nothing to set up in the Inspector.
-            spawnAction = new InputAction("SpawnBubble", InputActionType.Button);
-            spawnAction.AddBinding("<XRController>{RightHand}/primaryButton"); // A button
-            spawnAction.AddBinding("<Keyboard>/g");
-            spawnAction.performed += _ => Spawn();
+            if (spawnActionReference != null)
+            {
+                spawnAction = spawnActionReference.action; // shared, rebindable action
+            }
+            else
+            {
+                // Fallback: test input defined in code.
+                spawnAction = new InputAction("SpawnBubble", InputActionType.Button);
+                spawnAction.AddBinding("<XRController>{RightHand}/primaryButton"); // A button
+                spawnAction.AddBinding("<Keyboard>/g");
+                ownsAction = true;
+            }
         }
 
-        private void OnEnable()  => spawnAction.Enable();
-        private void OnDisable() => spawnAction.Disable();
-        private void OnDestroy() => spawnAction.Dispose();
+        private void OnEnable()
+        {
+            spawnAction.performed += OnSpawnPressed;
+            spawnAction.Enable();
+        }
+
+        private void OnDisable()
+        {
+            spawnAction.performed -= OnSpawnPressed;
+            if (ownsAction) spawnAction.Disable(); // don't switch off a shared action
+        }
+
+        private void OnDestroy()
+        {
+            if (ownsAction) spawnAction.Dispose();
+        }
+
+        private void OnSpawnPressed(InputAction.CallbackContext _) => Spawn();
 
         private IEnumerator Start()
         {
@@ -79,7 +105,7 @@ namespace BubbleFeature.Bubbles
 
             Vector3 position = p.position + direction * spawnDistance + Vector3.up * spawnHeightAboveEyes;
             current = Instantiate(bubblePrefab, position, Quaternion.identity);
-            current.Popped += OnBubblePopped;
+            current.MessageReady += OnMessageReady;
 
             // Hand out the next gift.
             GiftData gift = null;
@@ -98,17 +124,15 @@ namespace BubbleFeature.Bubbles
             Debug.Log($"[Bubble] Spawned with gift: {(gift != null ? gift.name : "none")}", current);
         }
 
-        // Show the gift where the bubble popped.
-        private void OnBubblePopped(GiftBubble bubble)
+        // Show the gift where the tiny bubbles came together.
+        private void OnMessageReady(GiftData gift, Vector3 position)
         {
-            bubble.Popped -= OnBubblePopped;
-            if (revealPrefab == null || bubble.Gift == null) return;
+            if (revealPrefab == null || gift == null) return;
 
             if (currentReveal != null) Destroy(currentReveal.gameObject); // one reveal at a time
 
-            Vector3 position = bubble.transform.position + Vector3.up * revealHeightOffset;
             currentReveal = Instantiate(revealPrefab, position, Quaternion.identity);
-            currentReveal.Show(bubble.Gift, Player);
+            currentReveal.Show(gift, Player);
         }
     }
 }

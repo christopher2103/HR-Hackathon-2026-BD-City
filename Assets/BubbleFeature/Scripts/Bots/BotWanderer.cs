@@ -20,6 +20,8 @@ namespace BubbleFeature.Bots
         private Vector3 home;
 
         public string DisplayName => displayName;
+        public Color Color { get; private set; } = Color.white;  // used by the gift menu buttons
+        public void SetColor(Color color) => Color = color;
         public void SetName(string newName) { displayName = newName; name = $"Bot ({newName})"; }
 
         private void Awake() => agent = GetComponent<NavMeshAgent>();

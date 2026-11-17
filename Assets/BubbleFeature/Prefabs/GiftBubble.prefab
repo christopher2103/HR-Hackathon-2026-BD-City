@@ -238,7 +238,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.2
+  m_Radius: 0.27
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6566633532537328883
 MonoBehaviour:
@@ -266,6 +266,8 @@ MonoBehaviour:
   rainbowSaturation: 0.6
   popSwellScale: 1.3
   popDuration: 0.12
+  popEffect: {fileID: 118681450056079169, guid: 0e6490b7bd64e2844a54890d71eab358, type: 3}
+  messageFormHeight: 0.12
 --- !u!114 &1578022558393653077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,6 +374,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85ac244d1cc5f514c82c3be6917285f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BubbleFeature.Bubbles.GiftBubbleXRPop
+  popAction: {fileID: 2209699223918732309, guid: 0b7e58584268f1e4489eb2570675bee8, type: 3}
+  aimGraceSeconds: 0.35
 --- !u!1 &7799124762385229052
 GameObject:
   m_ObjectHideFlags: 0

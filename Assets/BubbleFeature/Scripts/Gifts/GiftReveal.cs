@@ -62,7 +62,11 @@ namespace BubbleFeature.Gifts
             messageText.ForceMeshUpdate();
             Bounds b = messageText.textBounds; // in the text's local space
             textPanel.localScale = new Vector3(b.size.x + panelPadding.x, b.size.y + panelPadding.y, 1f);
-            textPanel.localPosition = new Vector3(b.center.x, b.center.y, 0.005f); // just behind the text
+            textPanel.localPosition = new Vector3(b.center.x, b.center.y, 0.01f); // just behind the text
+
+            // Always draw the panel first and the text on top (both are see-through, so their order matters).
+            if (textPanel.TryGetComponent(out Renderer panelRenderer)) panelRenderer.sortingOrder = 0;
+            if (messageText.TryGetComponent(out Renderer textRenderer)) textRenderer.sortingOrder = 1;
         }
 
         private void SpawnItem(GiftData gift)
@@ -121,6 +125,16 @@ namespace BubbleFeature.Gifts
                 block.SetColor(BaseColorId, color);
                 r.SetPropertyBlock(block);
             }
+        }
+
+        // The text can still change size after Show (auto-size), so keep the panel matched to it.
+        private void LateUpdate()
+        {
+            if (textPanel == null || messageText == null) return;
+            Bounds b = messageText.textBounds;
+            if (b.size.x <= 0f) return;
+            textPanel.localScale = new Vector3(b.size.x + panelPadding.x, b.size.y + panelPadding.y, 1f);
+            textPanel.localPosition = new Vector3(b.center.x, b.center.y, 0.01f);
         }
 
         private void Update()

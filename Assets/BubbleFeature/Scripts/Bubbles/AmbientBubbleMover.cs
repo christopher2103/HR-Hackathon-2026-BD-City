@@ -29,6 +29,9 @@ namespace BubbleFeature.Bubbles
         private float phase;
         private bool arrived;
 
+        /// <summary>Flight speed in m/s (sent gifts fly faster so they catch walking bots).</summary>
+        public float Speed { get => speed; set => speed = value; }
+
         /// <summary>Fired just before the bubble is removed, so the spawner can make a new one.</summary>
         public event Action<AmbientBubbleMover> Finished;
 

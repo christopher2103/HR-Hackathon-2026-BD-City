@@ -42,15 +42,23 @@ namespace BubbleFeature.Bubbles
         [Header("Pop")]
         [SerializeField] private float popSwellScale = 1.3f; // grows 30% ...
         [SerializeField] private float popDuration = 0.12f;  // ... in this many seconds, then vanishes
+        [Tooltip("Tiny bubbles burst out and gather where the message appears. Tinted with the core's current colour.")]
+        [SerializeField] private PopBurstEffect popEffect;
+        [SerializeField] private float messageFormHeight = 0.12f; // where the tiny bubbles gather, above the pop point
 
         private Vector3 shellBaseScale;
         private Vector3 coreBaseScale;
         private float phase; // random offset so bubbles don't wobble or colour in sync
         private float[] baseAlphas; // keep each material's own transparency (glow halo)
         private MaterialPropertyBlock propertyBlock;
+        private Color currentCoreColor = Color.white;
 
         /// <summary>Fired once when the bubble pops. Used to show the gift reveal.</summary>
         public event Action<GiftBubble> Popped;
+
+        /// <summary>Fired when the gift message should appear: after the tiny bubbles have gathered
+        /// (or straight away without a pop effect). Gives the gift and where to show it.</summary>
+        public event Action<GiftData, Vector3> MessageReady;
 
         /// <summary>The gift inside this bubble (null = empty bubble).</summary>
         public GiftData Gift => gift;
@@ -106,6 +114,7 @@ namespace BubbleFeature.Bubbles
 
             float hue = Mathf.Repeat(t / secondsPerRainbow, 1f);
             Color color = Color.HSVToRGB(hue, rainbowSaturation, 1f);
+            currentCoreColor = color;
 
             for (int i = 0; i < rainbowRenderers.Length; i++)
             {
@@ -132,8 +141,28 @@ namespace BubbleFeature.Bubbles
             if (flight != null) flight.Stop();
             foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
 
+            SpawnPopEffect();
             Popped?.Invoke(this);
             StartCoroutine(PopRoutine());
+        }
+
+        // Tiny bubbles burst out, then gather into the point where the message appears.
+        private void SpawnPopEffect()
+        {
+            Vector3 formPoint = transform.position + Vector3.up * messageFormHeight;
+            GiftData poppedGift = gift;
+
+            if (popEffect == null)
+            {
+                MessageReady?.Invoke(poppedGift, formPoint);
+                return;
+            }
+
+            PopBurstEffect fx = Instantiate(popEffect, transform.position, Quaternion.identity);
+            Color tint = currentCoreColor;
+            tint.a = 0.8f;
+            fx.Formed += () => MessageReady?.Invoke(poppedGift, formPoint); // the bubble itself is gone by then
+            fx.Play(formPoint, tint);
         }
 
         private IEnumerator PopRoutine()

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Unity.AI.Navigation;
@@ -28,6 +29,11 @@ namespace BubbleFeature.Bots
         [Tooltip("Ambient bubbles will also fly to these bots.")]
         [SerializeField] private AmbientBubbleSpawner ambientBubbles;
 
+        private readonly List<BotWanderer> bots = new List<BotWanderer>();
+
+        /// <summary>The bots in the scene (used by the gift menu to pick a recipient).</summary>
+        public IReadOnlyList<BotWanderer> Bots => bots;
+
         private void Awake()
         {
             // Build the NavMesh before the bots (and AmbientBubbleSpawner.Start) need it.
@@ -44,7 +50,10 @@ namespace BubbleFeature.Bots
                 Vector3 position = RandomPointOnNavMesh();
                 BotWanderer bot = Instantiate(botPrefab, position, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f), transform);
                 bot.SetName(botNames[i]);
-                Tint(bot.gameObject, Color.HSVToRGB((float)i / botNames.Length, 0.55f, 0.9f));
+                Color color = Color.HSVToRGB((float)i / botNames.Length, 0.55f, 0.9f);
+                bot.SetColor(color);
+                Tint(bot.gameObject, color);
+                bots.Add(bot);
                 spawned[i] = bot.transform;
             }
 
