@@ -1,0 +1,45 @@
+fileFormatVersion: 2
+guid: 912c818d36c8321dce5aa8dcf2915bb8
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jewel_AntiqueSilver
+    second: {fileID: 2100000, guid: e7941eafb19c243669c8b6b3a1dc4d45, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jewel_HeartEnamel
+    second: {fileID: 2100000, guid: 5e56bd25277836b206331cc3130a238d, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
+    isReadable: 0
+    optimizeMeshPolygons: 1
+    optimizeMeshVertices: 1
+    useFileUnits: 1
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 0
+  animationType: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

@@ -55,6 +55,10 @@ namespace BubbleFeature.Menu
             "Enjoy!", "Welkom in B&D City!", "Looking good!", "This made me think of you"
         };
 
+        [Header("City (optional)")]
+        [Tooltip("Adds 'Go to...' to the main menu when this scene has neighbourhoods.")]
+        [SerializeField] private CityFeature.NeighbourhoodTeleporter teleporter;
+
         [Header("Controls screen (rebinding)")]
         [SerializeField] private RebindRow[] rebindRows;
         [SerializeField] private float rebindTimeout = 8f;
@@ -155,6 +159,7 @@ namespace BubbleFeature.Menu
         {
             ShowScreen("B&D City", null);
             AddOption("Send gift", ShowRecipients);
+            if (teleporter != null) AddOption("Go to...", ShowGoTo);
             AddOption("Change outfit (soon)", null);
             AddOption("Controls", ShowControls);
             AddOption("Close", Close);
@@ -232,6 +237,20 @@ namespace BubbleFeature.Menu
             ShowScreen($"Sent to {to}!", null);
             AddOption("Send another", ShowRecipients);
             AddOption("Close", Close);
+        }
+
+        // ---------- City: travel between neighbourhoods ----------
+
+        private void ShowGoTo()
+        {
+            ShowScreen("Go to...", ShowMain);
+            var list = teleporter.Neighbourhoods;
+            for (int i = 0; i < list.Count; i++)
+            {
+                int index = i;
+                string label = list[i].name == teleporter.CurrentName ? $"{list[i].name}  (here)" : list[i].name;
+                AddOption(label, () => { Close(); teleporter.GoTo(index); });
+            }
         }
 
         // ---------- Controls (rebinding) ----------

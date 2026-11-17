@@ -169,3 +169,6 @@ Packages/packages-lock.json linguist-generated
 
 # Exceptions for .asset files such as lightning pre-baking
 LightingData.asset     binary
+
+# Frozen (saved) city neighbourhoods: big mesh assets go to LFS
+Assets/CityFeature/Frozen/**/*.asset lfs

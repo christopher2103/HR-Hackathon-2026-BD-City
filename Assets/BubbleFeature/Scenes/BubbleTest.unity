@@ -373,7 +373,28 @@ MonoBehaviour:
   - Fatima
   spawnRadius: 8
   minDistanceFromPlayer: 2.5
+  wanderRadius: 6
+  shirtMaterials:
+  - {fileID: 2100000, guid: 73576c9bb38556f4d8f0ea3e4260b696, type: 2}
+  - {fileID: 2100000, guid: 1c178a2b04d89ff4dbb5c32925eabcec, type: 2}
+  - {fileID: 2100000, guid: d8c56de225c07ba489fd402b27fbd6fa, type: 2}
+  - {fileID: 2100000, guid: fafc0cca01c5b3d498cdb2469ececeab, type: 2}
+  - {fileID: 2100000, guid: 08ac957652e623d4ea76277d377a061c, type: 2}
+  shirtRendererName: casualsuit
+  femaleBotPrefab: {fileID: 7328914109536682896, guid: 2c052fbb4b823574f9e7e505eae0d01d, type: 3}
+  femaleNames:
+  - Sanne
+  - Noor
+  - Fatima
+  femaleTopRendererName: Jacket
+  spawnOnStart: 1
+  useNavMesh: 1
   surface: {fileID: 1978761694}
+  keepNearPlayer: 1
+  maxDistanceFromPlayer: 18
+  relocateDistance: {x: 6, y: 12}
+  playerFeet: {fileID: 0}
+  checkInterval: 0.5
   ambientBubbles: {fileID: 1370821393}
 --- !u!4 &475140176
 Transform:
@@ -484,10 +505,12 @@ MonoBehaviour:
   bubblePrefab: {fileID: 6566633532537328883, guid: 12297d9bec21e724c8e66affa73c5c54, type: 3}
   gifts:
   - {fileID: 11400000, guid: 70e817505c702aa449e8b01efd13678a, type: 2}
-  - {fileID: 11400000, guid: dde0ccda79938fe40885343aeddad017, type: 2}
+  - {fileID: 11400000, guid: 324e1283b91fbbb4ba42d7cd2d3bd32e, type: 2}
+  - {fileID: 11400000, guid: f972e518837a49e4fa3924902a5cb767, type: 2}
+  - {fileID: 11400000, guid: c931c940ab042424e96ed6534250e246, type: 2}
+  - {fileID: 11400000, guid: 01ab51264dfa68c4886143b9684b46d3, type: 2}
   - {fileID: 11400000, guid: dca3e3742fac2e249a1b6926be2fc7f5, type: 2}
   revealPrefab: {fileID: 2239037609144540630, guid: 96e129538451ae84c9b3859334e25a43, type: 3}
-  revealHeightOffset: 0.1
   player: {fileID: 0}
   spawnDistance: 8
   spawnHeightAboveEyes: 1
@@ -684,12 +707,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BubbleFeature.Bubbles.AmbientBubbleSpawner
   bubblePrefab: {fileID: 738532315213900764, guid: 3cb1c2ac38582864886176c7219e596c, type: 3}
   count: 6
+  spawnOnStart: 1
   player: {fileID: 0}
+  floorReference: {fileID: 0}
   areaRadius: 15
   minDistanceFromPlayer: 3
   minTravelDistance: 5
   spawnHeight: {x: 2.5, y: 5}
   targetHeight: {x: 1.2, y: 2.2}
+  spawnOutOfView: 1
+  maxDistanceFromPlayer: 25
+  checkInterval: 0.5
   targets: []
   targetHeadHeight: 2
   targetChance: 0.6

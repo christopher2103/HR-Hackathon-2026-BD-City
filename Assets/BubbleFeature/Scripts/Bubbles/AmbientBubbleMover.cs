@@ -55,6 +55,15 @@ namespace BubbleFeature.Bubbles
             targetOffset = offset;
         }
 
+        /// <summary>Remove right away, without the arrival pop (e.g. when it drifted far away out of sight).</summary>
+        public void Despawn()
+        {
+            if (arrived) return;
+            arrived = true;
+            Finished?.Invoke(this);
+            Destroy(gameObject);
+        }
+
         private void Update()
         {
             if (arrived) return;

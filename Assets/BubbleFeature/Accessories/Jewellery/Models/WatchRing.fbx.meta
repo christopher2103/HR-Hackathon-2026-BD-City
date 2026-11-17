@@ -1,0 +1,50 @@
+fileFormatVersion: 2
+guid: 0f58f285d17e15be7178b1d1127f6174
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jewel_PolishedSilver
+    second: {fileID: 2100000, guid: d01eb3be3faf5b90bf9a12debf5ce948, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jewel_WatchDial
+    second: {fileID: 2100000, guid: 9fdc75fec738be0a466f7ad96163645c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jewel_Glass
+    second: {fileID: 2100000, guid: 97803918c05429df0f598c844b169832, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
+    isReadable: 0
+    optimizeMeshPolygons: 1
+    optimizeMeshVertices: 1
+    useFileUnits: 1
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 0
+  animationType: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

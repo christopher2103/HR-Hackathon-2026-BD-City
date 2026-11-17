@@ -816,8 +816,10 @@ MonoBehaviour:
   bots: {fileID: 0}
   sender: {fileID: 2281182589016623726}
   accessoryOptions:
-  - {fileID: 11400000, guid: 74149c3ffd30b364684785669e63131c, type: 2}
-  - {fileID: 11400000, guid: d7eebf47a2623d04492dc0d05d193847, type: 2}
+  - {fileID: 11400000, guid: 8827dfc3404cceb4497e13fe068a3da1, type: 2}
+  - {fileID: 11400000, guid: 56c37e75014e6e749a6ae036aa54e498, type: 2}
+  - {fileID: 11400000, guid: 673751e9c6aef4143b8df1314a93c5ef, type: 2}
+  - {fileID: 11400000, guid: e68d51b59814c3f47a999c689fc6749b, type: 2}
   clothingOptions:
   - {fileID: 11400000, guid: 54beb9aaaa2afb841834825b701c7783, type: 2}
   - {fileID: 11400000, guid: b501bafd9d068644cbd0cf758b5774f4, type: 2}
@@ -826,6 +828,7 @@ MonoBehaviour:
   - Welkom in B&D City!
   - Looking good!
   - This made me think of you
+  teleporter: {fileID: 0}
   rebindRows:
   - label: Open menu
     action: {fileID: 2981575712895332859, guid: 0b7e58584268f1e4489eb2570675bee8, type: 3}

@@ -1,0 +1,50 @@
+fileFormatVersion: 2
+guid: c47e4b81f17dd857d862dc2c6f23c8fe
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jewel_RoseGold
+    second: {fileID: 2100000, guid: ad8a35b5633f203634a5881051a82197, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jewel_AntiqueSilver
+    second: {fileID: 2100000, guid: e7941eafb19c243669c8b6b3a1dc4d45, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Jewel_Onyx
+    second: {fileID: 2100000, guid: c921e8c0680310b540d08095635b1823, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
+    isReadable: 0
+    optimizeMeshPolygons: 1
+    optimizeMeshVertices: 1
+    useFileUnits: 1
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 0
+  animationType: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:
