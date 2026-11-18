@@ -28,6 +28,9 @@ namespace BubbleFeature.Bubbles
         [SerializeField] private float aimAssistDegrees = 9f;
         [SerializeField] private float aimAssistMaxDistance = 6f;
 
+        /// <summary>How far away aim assist still works (the mini game uses farther bubbles).</summary>
+        public float AimAssistMaxDistance { get => aimAssistMaxDistance; set => aimAssistMaxDistance = value; }
+
         private GiftBubble bubble;
         private XRSimpleInteractable interactable;
         private float lastHoverLeft = -10f, lastHoverRight = -10f;

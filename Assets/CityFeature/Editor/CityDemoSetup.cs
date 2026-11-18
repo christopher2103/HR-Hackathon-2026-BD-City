@@ -30,6 +30,7 @@ namespace CityFeature.EditorTools
             sb.AppendLine(Light());
             sb.AppendLine(QuestSettings());
             sb.AppendLine(Gifts());
+            sb.AppendLine(BubbleGameSetup());
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
             return sb.ToString();
@@ -192,6 +193,28 @@ namespace CityFeature.EditorTools
             EditorUtility.SetDirty(mob);
             AssetDatabase.SaveAssets();
             return $"Quest (Mobile) URP: MSAA {mob.msaaSampleCount}x, HDR {mob.supportsHDR}, render scale {mob.renderScale}";
+        }
+
+        // ---------------- Bubble Sky mini game ----------------
+        public static string BubbleGameSetup()
+        {
+            var game = Comp<BubbleGame>(Root("Bubble Game"));
+            var so = new SerializedObject(game);
+            so.FindProperty("teleporter").objectReferenceValue = Find<NeighbourhoodTeleporter>();
+            so.FindProperty("loadingScreen").objectReferenceValue = Find<LoadingScreen>();
+            so.FindProperty("tutorial").objectReferenceValue = Find<TutorialGuide>();
+            so.FindProperty("detailMaterial").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Material>("Assets/CityFeature/Materials/FlatDetail.mat");
+            so.FindProperty("glassMaterial").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Material>("Assets/CityFeature/Materials/M_StationGlass.mat");
+            so.FindProperty("bubblePrefab").objectReferenceValue = AssetDatabase.LoadAssetAtPath<BubbleFeature.Bubbles.GiftBubble>("Assets/BubbleFeature/Prefabs/GiftBubble.prefab");
+            so.FindProperty("panelSprite").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/BubbleFeature/Textures/UI_BubblePanel.png");
+            so.FindProperty("pillSprite").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/BubbleFeature/Textures/UI_Pill.png");
+            so.FindProperty("font").objectReferenceValue = AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>("Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Roboto-Bold SDF.asset");
+            so.ApplyModifiedProperties();
+            var menu = Find<BubbleFeature.Menu.GiftMenu>();
+            var mso = new SerializedObject(menu);
+            mso.FindProperty("bubbleGame").objectReferenceValue = game;
+            mso.ApplyModifiedProperties();
+            return "Bubble game: wired to the menu";
         }
 
         // ---------------- Gifts ----------------

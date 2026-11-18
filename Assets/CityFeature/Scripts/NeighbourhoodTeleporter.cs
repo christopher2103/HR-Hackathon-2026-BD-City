@@ -76,6 +76,23 @@ namespace CityFeature
 
         public IReadOnlyList<Neighbourhood> Neighbourhoods => neighbourhoods;
         public string CurrentName => currentIndex >= 0 ? neighbourhoods[currentIndex].name : "";
+        public int CurrentIndex => currentIndex;
+
+        /// <summary>
+        /// Shows only the saved (frozen) copy of this neighbourhood without moving the player, and stops keeping the
+        /// player on the ground (used by the bubble game platform high above the city). Travel with GoTo() afterwards.
+        /// </summary>
+        public void ShowOnly(string neighbourhood)
+        {
+            StopAllCoroutines();
+            if (!FrozenMode) return;
+            Neighbourhood target = null;
+            foreach (Neighbourhood n in neighbourhoods) if (n.name == neighbourhood) target = n;
+            if (target == null) return;
+            foreach (Neighbourhood n in neighbourhoods) if (n.frozen != target.frozen) n.frozen.SetActive(false);
+            target.frozen.SetActive(true);
+            Physics.SyncTransforms();
+        }
 
         /// <summary>Fired when the player has been placed on the ground, still behind the loading screen (name of the neighbourhood).</summary>
         public event Action<string> Arrived;

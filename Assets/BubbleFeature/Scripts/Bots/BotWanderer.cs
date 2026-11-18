@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -87,86 +88,188 @@ namespace BubbleFeature.Bots
         }
 
         // ---------- Simple walking ----------
+        // Smooth steering instead of "turn on the spot, walk straight, stop at a wall":
+        //  - eases in/out of walking and turns while walking (no snapping),
+        //  - looks ahead with a body-wide sphere cast and steers around benches, bikes, trees, lamps and stands,
+        //  - keeps its distance from other bots, Lotte and the player,
+        //  - only stands on the street (CityPart ground), never on top of a lamp, tree or prop,
+        //  - stays on its own level (no wandering down quay ramps into the harbour).
+
+        private static readonly List<BotWanderer> all = new List<BotWanderer>();
+        private static readonly List<Transform> others = new List<Transform>();   // Lotte etc.
+
+        /// <summary>Something bots should walk around (e.g. the tutorial NPC). Unregister when it is destroyed.</summary>
+        public static void RegisterObstacle(Transform t) { if (t != null && !others.Contains(t)) others.Add(t); }
+        public static void UnregisterObstacle(Transform t) => others.Remove(t);
+
+        [Header("Smooth steering")]
+        [SerializeField] private float acceleration = 1.6f;          // m/s per second
+        [SerializeField] private float bodyRadius = 0.28f;
+        [SerializeField] private float personalSpace = 1.1f;         // keep this far from other people
+        [SerializeField] private float levelTolerance = 0.6f;        // stay within this height of the home spot
+
+        private float speedNow;
+        private Vector3 heading;
+        private float groundVelocity;
+
+        private void OnEnable() { if (!all.Contains(this)) all.Add(this); }
+        private void OnDisable() => all.Remove(this);
 
         private IEnumerator SimpleWander()
         {
+            heading = Flat(transform.forward);
+            float y;
+            if (GroundAt(transform.position, transform.position.y, 3f, out y)) transform.position = new Vector3(transform.position.x, y, transform.position.z);
+            home = transform.position;
             while (true)
             {
-                Vector2 offset = Random.insideUnitCircle * wanderRadius;
-                Vector3 goal = home + new Vector3(offset.x, 0f, offset.y);
-
-                float timeout = 15f;
+                Vector3 goal = PickGoal();
+                float timeout = 18f, stuck = 0f;
                 while (timeout > 0f)
                 {
-                    Settle();
-                    Vector3 toGoal = goal - transform.position;
-                    toGoal.y = 0f;
-                    if (toGoal.magnitude < 0.3f) break;
+                    Vector3 toGoal = goal - transform.position; toGoal.y = 0f;
+                    float dist = toGoal.magnitude;
+                    if (dist < 0.35f) break;
 
-                    // Turn towards the goal.
-                    Quaternion want = Quaternion.LookRotation(toGoal.normalized, Vector3.up);
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, want, turnSpeed * Time.deltaTime);
+                    Vector3 want = Steer(toGoal / Mathf.Max(dist, 0.001f), out bool blocked);
+                    if (blocked) { stuck += Time.deltaTime; if (stuck > 0.6f) break; } else stuck = 0f;
 
-                    // Only walk when (roughly) facing it, and when the way ahead is clear.
-                    if (Quaternion.Angle(transform.rotation, want) < 30f)
-                    {
-                        Vector3 next = transform.position + transform.forward * walkSpeed * Time.deltaTime;
-                        if (!Blocked() && GroundBelow(next, out float groundY))
-                            transform.position = new Vector3(next.x, groundY, next.z);
-                        else
-                            break; // wall, drop or no ground: pick another goal
-                    }
+                    // Turn smoothly; slow down for sharp turns and near the goal.
+                    heading = Vector3.RotateTowards(heading, want, turnSpeed * Mathf.Deg2Rad * Time.deltaTime, 0f);
+                    float align = Mathf.Clamp01(Vector3.Dot(heading, want));
+                    float target = blocked ? 0f : walkSpeed * Mathf.Lerp(0.25f, 1f, align) * Mathf.Clamp01(dist / 1.2f + 0.35f);
+                    speedNow = Mathf.MoveTowards(speedNow, target, acceleration * Time.deltaTime);
+                    Move(heading * speedNow * Time.deltaTime);
+                    transform.rotation = Quaternion.LookRotation(heading, Vector3.up);
 
                     timeout -= Time.deltaTime;
                     yield return null;
                 }
+                // Ease out, then pause.
+                while (speedNow > 0.02f)
+                {
+                    speedNow = Mathf.MoveTowards(speedNow, 0f, acceleration * 1.5f * Time.deltaTime);
+                    Move(heading * speedNow * Time.deltaTime);
+                    yield return null;
+                }
+                speedNow = 0f;
                 float pause = Random.Range(pauseSeconds.x, pauseSeconds.y);
-                while (pause > 0f) { Settle(); pause -= Time.deltaTime; yield return null; }
+                while (pause > 0f) { Move(Vector3.zero); pause -= Time.deltaTime; yield return null; }
             }
         }
 
-        // Streamed ground can get more detailed (and higher/lower) after we spawned: stand on what is there now.
-        private void Settle()
+        // Moves horizontally if there is street there, and eases the height to the ground (no popping).
+        private void Move(Vector3 step)
         {
-            Vector3 from = transform.position + Vector3.up * 4f;
-            float best = float.MinValue;
-            foreach (RaycastHit hit in Physics.RaycastAll(from, Vector3.down, 10f, ~0, QueryTriggerInteraction.Ignore))
-            {
-                if (hit.transform.IsChildOf(transform)) continue;
-                best = Mathf.Max(best, hit.point.y);
-            }
-            if (best != float.MinValue && Mathf.Abs(best - transform.position.y) > 0.02f)
-                transform.position = new Vector3(transform.position.x, best, transform.position.z);
+            Vector3 p = transform.position + step + Separation();
+            if (!GroundAt(p, transform.position.y, maxStep, out _)) p = transform.position;   // no street there: stay
+            if (GroundAt(p, transform.position.y, maxStep + 0.2f, out float g))
+                p.y = Mathf.SmoothDamp(transform.position.y, g, ref groundVelocity, 0.08f);
+            transform.position = p;
         }
 
-        // Anything at knee or chest height in front of us (buildings, the player)?
-        private bool Blocked()
+        // Hard minimum distance to other people (steering alone can still let two bots brush shoulders).
+        private Vector3 Separation()
         {
-            foreach (float h in new[] { 0.5f, 1.3f })
+            const float minGap = 0.75f;
+            Vector3 push = Vector3.zero;
+            void From(Vector3 o)
             {
-                Vector3 from = transform.position + Vector3.up * h;
-                foreach (RaycastHit hit in Physics.RaycastAll(from, transform.forward, lookAhead, ~0, QueryTriggerInteraction.Ignore))
-                    if (!hit.transform.IsChildOf(transform)) return true;
+                Vector3 d = transform.position - o; d.y = 0f;
+                float m = d.magnitude;
+                if (m < minGap && m > 0.001f) push += d / m * (minGap - m);
             }
-            return false;
+            foreach (var b in all) if (b != this && b != null) From(b.transform.position);
+            foreach (var t in others) if (t != null) From(t.position);
+            return Vector3.ClampMagnitude(push * 0.5f, walkSpeed * Time.deltaTime * 1.5f);
         }
 
-        // Ground under a point, within one step up or down of where we stand now.
-        private bool GroundBelow(Vector3 p, out float groundY)
+        // Desired direction: towards the goal, around things in the way, away from people that are too close.
+        private Vector3 Steer(Vector3 toGoal, out bool blocked)
+        {
+            Vector3 dir = toGoal;
+            // Personal space.
+            Vector3 push = Vector3.zero;
+            foreach (var b in all) if (b != this && b != null) push += Away(b.transform.position);
+            foreach (var t in others) if (t != null) push += Away(t.position);
+            if (Camera.main != null) push += Away(Camera.main.transform.position) * 1.5f;
+            dir = Flat(dir + push);
+
+            // Obstacles: try the wanted direction, then fan out left/right.
+            float look = lookAhead + speedNow * 0.6f;
+            foreach (float a in new[] { 0f, 25f, -25f, 50f, -50f, 80f, -80f })
+            {
+                Vector3 d = Quaternion.Euler(0f, a, 0f) * dir;
+                if (Clear(d, look)) { blocked = false; return a == 0f ? dir : Vector3.Slerp(dir, d, 0.85f).normalized; }
+            }
+            blocked = true;
+            return dir;
+        }
+
+        private Vector3 Away(Vector3 other)
+        {
+            Vector3 d = transform.position - other; d.y = 0f;
+            float m = d.magnitude;
+            if (m > personalSpace || m < 0.001f) return Vector3.zero;
+            return d / m * (personalSpace - m) / personalSpace * 1.8f;
+        }
+
+        // Body-wide check at knee and chest height, plus: is there street (on our level) ahead?
+        private bool Clear(Vector3 dir, float distance)
+        {
+            foreach (float h in new[] { 0.45f, 1.25f })
+            {
+                Vector3 from = transform.position + Vector3.up * h - dir * 0.05f;
+                foreach (RaycastHit hit in Physics.SphereCastAll(from, bodyRadius, dir, distance, ~0, QueryTriggerInteraction.Ignore))
+                {
+                    if (hit.transform.IsChildOf(transform)) continue;
+                    if (hit.distance <= 0f && hit.point == Vector3.zero) continue;   // started inside: ignore
+                    var part = hit.collider.GetComponentInParent<CityFeature.CityPart>();
+                    if (part != null && part.isGround && hit.normal.y > 0.7f) continue;      // walkable floor
+                    return false;
+                }
+            }
+            Vector3 ahead = transform.position + dir * Mathf.Min(distance, 1.2f);
+            return GroundAt(ahead, transform.position.y, maxStep, out _);
+        }
+
+        // A random goal around home that is on the street, on our level, and reachable in a straight line.
+        private Vector3 PickGoal()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                Vector2 o = Random.insideUnitCircle * wanderRadius;
+                Vector3 g = home + new Vector3(o.x, 0f, o.y);
+                if (!GroundAt(g, home.y, levelTolerance, out float y)) continue;
+                g.y = y;
+                Vector3 d = g - transform.position; d.y = 0f;
+                if (d.magnitude < 1.5f) continue;
+                if (Physics.SphereCast(transform.position + Vector3.up * 0.9f, bodyRadius, d.normalized, out RaycastHit hit, d.magnitude, ~0, QueryTriggerInteraction.Ignore)
+                    && !hit.transform.IsChildOf(transform)) continue;
+                return g;
+            }
+            return transform.position - heading * 2f;   // turn around
+        }
+
+        // Street height at p within 'tolerance' of 'level'. Only real ground counts (not lamps, trees, props, stands).
+        private static bool GroundAt(Vector3 p, float level, float tolerance, out float groundY)
         {
             groundY = 0f;
             float best = float.MinValue;
-            Vector3 from = new Vector3(p.x, transform.position.y + maxStep + 0.5f, p.z);
-            foreach (RaycastHit hit in Physics.RaycastAll(from, Vector3.down, maxStep * 2f + 0.5f, ~0, QueryTriggerInteraction.Ignore))
+            foreach (RaycastHit hit in Physics.RaycastAll(new Vector3(p.x, level + 3f, p.z), Vector3.down, 6f, ~0, QueryTriggerInteraction.Ignore))
             {
-                if (hit.transform.IsChildOf(transform)) continue;
-                if (Mathf.Abs(hit.point.y - transform.position.y) > maxStep) continue;
+                var part = hit.collider.GetComponentInParent<CityFeature.CityPart>();
+                bool ground = part != null ? part.isGround : hit.normal.y > 0.8f && !(hit.collider is CapsuleCollider) && hit.collider.gameObject.layer != 2;
+                if (!ground) continue;
+                if (Mathf.Abs(hit.point.y - level) > tolerance) continue;
                 best = Mathf.Max(best, hit.point.y);
             }
             if (best == float.MinValue) return false;
             groundY = best;
             return true;
         }
+
+        private static Vector3 Flat(Vector3 v) { v.y = 0f; return v.sqrMagnitude > 1e-6f ? v.normalized : Vector3.forward; }
 
         // ---------- NavMesh ----------
 

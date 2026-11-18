@@ -260,6 +260,8 @@ namespace CityFeature.EditorTools
                 return g;
             }
             var used = new List<(Vector3 p, float r)>();
+            // Invisible blockers (bots and the player bump into them): centre, size, yaw, capsule?
+            var blockers = new List<(Vector3 c, Vector3 size, float yaw, bool capsule)>();
             bool Free(Vector3 p, float r)
             {
                 foreach (var u in used) if ((new Vector2(u.p.x - p.x, u.p.z - p.z)).magnitude < u.r + r) return false;
@@ -320,6 +322,8 @@ namespace CityFeature.EditorTools
                         bikes++;
                     }
                     used.Add((cnd.p, len * 0.5f + 1.2f));
+                    float rowYaw = Mathf.Atan2(along.x, along.z) * Mathf.Rad2Deg;
+                    blockers.Add((cnd.p + Vector3.up * 0.55f, new Vector3(1.4f, 1.1f, len + 0.3f), rowYaw, false));
                     groups++;
                 }
 
@@ -341,13 +345,14 @@ namespace CityFeature.EditorTools
                         if (NearestWall(p, 1.8f, out _, out _) || !Free(p, 0.9f)) continue;
                         // Front (local +z) faces away from the tree.
                         Place(p, Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg, Bench);
+                        blockers.Add((p + Vector3.up * 0.45f, new Vector3(1.85f, 0.9f, 0.6f), Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg, false));
                         used.Add((p, 1.1f)); benches++;
                         if (rng.NextDouble() < 0.4)
                         {
                             Vector3 side = Vector3.Cross(Vector3.up, dir) * 1.3f;
                             Vector3 bp = p + side;
                             if (Sample(bp + Vector3.up * 20f, cache, out var s3, out float y3) && (s3 == Surface.Walk || s3 == Surface.Green) && Free(bp, 0.35f))
-                            { bp.y = y3; Place(bp, 0, Bin); used.Add((bp, 0.35f)); bins++; }
+                            { bp.y = y3; Place(bp, 0, Bin); used.Add((bp, 0.35f)); bins++; blockers.Add((bp + Vector3.up * 0.45f, new Vector3(0.27f, 0.9f, 0f), 0f, true)); }
                         }
                         break;
                     }
@@ -360,7 +365,7 @@ namespace CityFeature.EditorTools
                     if (hd > Radius || hd < 3f || rng.NextDouble() > 0.18) continue;
                     Vector3 p = l + Quaternion.Euler(0, rng.Next(4) * 90f, 0) * Vector3.forward * 0.75f;
                     if (!Sample(p + Vector3.up * 20f, cache, out var s, out float y) || s != Surface.Walk || !Free(p, 0.3f)) continue;
-                    p.y = y; Place(p, 0, Bin); used.Add((p, 0.35f)); bins++;
+                    p.y = y; Place(p, 0, Bin); used.Add((p, 0.35f)); bins++; blockers.Add((p + Vector3.up * 0.45f, new Vector3(0.27f, 0.9f, 0f), 0f, true));
                 }
 
                 // ---- 4. Bollards along pavement edges next to the road, close to the spawn ----
@@ -380,7 +385,7 @@ namespace CityFeature.EditorTools
                                     Sample(p - d * 1.2f + Vector3.up * 20f, cache, out var s3, out _) && s3 == Surface.Walk &&
                                     Sample(p - d * 2.6f + Vector3.up * 20f, cache, out var s4, out _) && s4 == Surface.Walk) { edge = true; break; } // real pavement, not a kerb line
                             if (!edge || rng.NextDouble() < 0.35 || !Free(p, 0.5f)) continue;
-                            p.y = y; Place(p, 0, Bollard); used.Add((p, 0.8f)); bollards++; here++;
+                            p.y = y; Place(p, 0, Bollard); used.Add((p, 0.8f)); bollards++; here++; blockers.Add((p + Vector3.up * 0.43f, new Vector3(0.1f, 0.86f, 0f), 0f, true));
                         }
                 }
             }
@@ -400,6 +405,19 @@ namespace CityFeature.EditorTools
             group.SetParent(root.transform, false);
             group.SetSiblingIndex(root.transform.Find("Props").GetSiblingIndex() + 1);
             Material mat = CityFacades.DetailMaterial();
+            // Invisible blockers on "Ignore Raycast": controller and teleport rays pass through, bodies don't.
+            var block = new GameObject("Blockers").transform;
+            block.SetParent(group, false);
+            block.gameObject.layer = 2;
+            foreach (var bl in blockers)
+            {
+                var b = new GameObject(bl.capsule ? "Post" : "Box") { layer = 2 };
+                b.transform.SetParent(block, false);
+                b.transform.SetPositionAndRotation(bl.c, Quaternion.Euler(0f, bl.yaw, 0f));
+                if (bl.capsule) { var cc = b.AddComponent<CapsuleCollider>(); cc.radius = bl.size.x; cc.height = bl.size.y; }
+                else b.AddComponent<BoxCollider>().size = bl.size;
+                b.isStatic = true;
+            }
             int tris = 0;
             foreach (var kv in chunks)
             {
@@ -420,7 +438,7 @@ namespace CityFeature.EditorTools
             PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
             PrefabUtility.UnloadPrefabContents(root);
             AssetDatabase.SaveAssets();
-            return $"{area}: {bikes} bikes in {groups} groups, {benches} benches, {bins} bins, {bollards} bollards — {tris / 1000f:F1}k tris in {chunks.Count} chunks";
+            return $"{area}: {blockers.Count} blockers, {bikes} bikes in {groups} groups, {benches} benches, {bins} bins, {bollards} bollards — {tris / 1000f:F1}k tris in {chunks.Count} chunks";
         }
     }
 }

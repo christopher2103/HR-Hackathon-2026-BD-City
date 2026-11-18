@@ -160,7 +160,7 @@ namespace CityFeature
         {
             if (standRoutine != null) { StopCoroutine(standRoutine); standRoutine = null; }
             if (walking != null) { StopCoroutine(walking); walking = null; }
-            if (guide != null) Destroy(guide.gameObject);
+            if (guide != null) { BubbleFeature.Bots.BotWanderer.UnregisterObstacle(guide); Destroy(guide.gameObject); }
             if (balloon != null) Destroy(balloon.gameObject);
             if (marker != null) Destroy(marker.gameObject);
             if (buttons != null) Destroy(buttons);
@@ -578,6 +578,7 @@ namespace CityFeature
             var agent = go.GetComponent<UnityEngine.AI.NavMeshAgent>();
             if (agent != null) Destroy(agent);
             guide = go.transform;
+            BubbleFeature.Bots.BotWanderer.RegisterObstacle(guide);   // bots walk around her
             // Her own jacket colour (warm orange), so she doesn't look like one of the bots.
             foreach (var r in go.GetComponentsInChildren<SkinnedMeshRenderer>())
                 if (r.name.Contains("Jacket"))

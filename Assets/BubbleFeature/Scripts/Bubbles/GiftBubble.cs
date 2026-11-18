@@ -109,8 +109,27 @@ namespace BubbleFeature.Bubbles
         }
 
         // Slowly cycles the hue. Uses a property block, so all bubbles share one material.
+        private bool fixedColour;
+
+        /// <summary>Stops the rainbow and gives the core one fixed colour (e.g. golden bubbles in the mini game).</summary>
+        public void SetFixedColor(Color color)
+        {
+            fixedColour = true;
+            currentCoreColor = color;
+            if (rainbowRenderers == null) return;
+            for (int i = 0; i < rainbowRenderers.Length; i++)
+            {
+                if (rainbowRenderers[i] == null) continue;
+                Color c = color; c.a = baseAlphas != null && i < baseAlphas.Length ? baseAlphas[i] : 1f;
+                rainbowRenderers[i].GetPropertyBlock(propertyBlock);
+                propertyBlock.SetColor(BaseColorId, c);
+                rainbowRenderers[i].SetPropertyBlock(propertyBlock);
+            }
+        }
+
         private void UpdateRainbow(float t)
         {
+            if (fixedColour) return;
             if (rainbowRenderers == null || rainbowRenderers.Length == 0) return;
 
             float hue = Mathf.Repeat(t / secondsPerRainbow, 1f);

@@ -59,6 +59,8 @@ namespace BubbleFeature.Menu
         [Header("City (optional)")]
         [Tooltip("Adds 'Go to...' to the main menu when this scene has neighbourhoods.")]
         [SerializeField] private CityFeature.NeighbourhoodTeleporter teleporter;
+        [Tooltip("Adds 'Bubble game' (or 'Leave bubble game' while you are on the platform).")]
+        [SerializeField] private CityFeature.BubbleGame bubbleGame;
         [Tooltip("Adds 'Replay tutorial' (or 'Skip tutorial' while it runs).")]
         [SerializeField] private CityFeature.TutorialGuide tutorial;
 
@@ -173,7 +175,12 @@ namespace BubbleFeature.Menu
             if (playerAvatar != null && playerAvatar.BodyCount > 0) AddOption("Change outfit", ShowOutfit);
             else AddOption("Change outfit (soon)", null);
             AddOption("Controls", ShowControls);
-            if (tutorial != null)
+            if (bubbleGame != null)
+            {
+                if (bubbleGame.IsActive) AddOption("Leave bubble game", () => { Close(); bubbleGame.Leave(); });
+                else AddOption("Bubble game!", () => { Close(); bubbleGame.Enter(); });
+            }
+            if (tutorial != null && (bubbleGame == null || !bubbleGame.IsActive))
             {
                 if (tutorial.IsRunning) AddOption("Skip tutorial", () => { Close(); tutorial.Skip(); });
                 else AddOption("Replay tutorial", () => { Close(); tutorial.Play(); });
