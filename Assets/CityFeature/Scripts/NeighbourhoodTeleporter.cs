@@ -25,6 +25,8 @@ namespace CityFeature
             public Transform spot;
             [Tooltip("Saved (frozen) copy of this neighbourhood. Used instead of streaming when 'Use Frozen Areas' is on.")]
             public GameObject frozen;
+            [Tooltip("Optional: the player arrives facing this (e.g. a landmark). Empty = face the most open direction.")]
+            public Transform lookAt;
         }
 
         [SerializeField] private Neighbourhood[] neighbourhoods;
@@ -134,6 +136,7 @@ namespace CityFeature
             if (k.digit1Key.wasPressedThisFrame) GoTo(0);
             if (k.digit2Key.wasPressedThisFrame) GoTo(1);
             if (k.digit3Key.wasPressedThisFrame) GoTo(2);
+            if (k.digit4Key.wasPressedThisFrame && neighbourhoods.Length > 3) GoTo(3);
         }
 
         public void GoTo(int index)
@@ -159,7 +162,9 @@ namespace CityFeature
             }
             if (frozen)
             {
-                foreach (Neighbourhood other in neighbourhoods) other.frozen.SetActive(other == n);
+                // Areas can share a frozen prefab (Stadhuis reuses Lijnbaan): switch the others off first, then ours on.
+                foreach (Neighbourhood other in neighbourhoods) if (other.frozen != n.frozen) other.frozen.SetActive(false);
+                n.frozen.SetActive(true);
                 Physics.SyncTransforms();
             }
 
@@ -196,7 +201,8 @@ namespace CityFeature
                     lastGroundY = ground.y;
                     safetyFloor.position = ground + Vector3.down * 0.05f; // stays as a small safe patch
                     MovePlayer(ground);
-                    FaceOpenDirection(ground - spot);
+                    if (n.lookAt != null) FaceTowards(n.lookAt.position - ground);
+                    else FaceOpenDirection(ground - spot);
                     Debug.Log($"[City] Arrived at {n.name} after {waited:F1} s (ground y={ground.y:F1}).", this);
                     StartCoroutine(WatchGround()); // keeps the player on the (still refining) ground
                     Arrived?.Invoke(n.name);
@@ -223,6 +229,16 @@ namespace CityFeature
 
         // Turn the player towards the longest free view (down the street instead of into a wall).
         // awayFromSpot: from the spot to where we landed (points out of the building when the spot was inside one).
+        private void FaceTowards(Vector3 direction)
+        {
+            Camera cam = xrOrigin != null ? xrOrigin.Camera : null;
+            direction.y = 0f;
+            if (cam == null || direction.sqrMagnitude < 0.01f) return;
+            Vector3 look = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up);
+            if (look.sqrMagnitude < 0.001f) look = xrOrigin.transform.forward;
+            xrOrigin.RotateAroundCameraUsingOriginUp(Vector3.SignedAngle(look, direction, Vector3.up));
+        }
+
         private void FaceOpenDirection(Vector3 awayFromSpot)
         {
             Camera cam = xrOrigin != null ? xrOrigin.Camera : null;

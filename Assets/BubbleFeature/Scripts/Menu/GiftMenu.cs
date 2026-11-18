@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using BubbleFeature.Bots;
 using BubbleFeature.Gifts;
+using BubbleFeature.Audio;
 
 namespace BubbleFeature.Menu
 {
@@ -58,6 +59,12 @@ namespace BubbleFeature.Menu
         [Header("City (optional)")]
         [Tooltip("Adds 'Go to...' to the main menu when this scene has neighbourhoods.")]
         [SerializeField] private CityFeature.NeighbourhoodTeleporter teleporter;
+        [Tooltip("Adds 'Replay tutorial' (or 'Skip tutorial' while it runs).")]
+        [SerializeField] private CityFeature.TutorialGuide tutorial;
+
+        [Header("Outfit (optional)")]
+        [Tooltip("The player's avatar: 'Change outfit' shows a mirror copy of it while you pick clothes.")]
+        [SerializeField] private CharacterFeature.PlayerAvatar playerAvatar;
 
         [Header("Controls screen (rebinding)")]
         [SerializeField] private RebindRow[] rebindRows;
@@ -88,7 +95,7 @@ namespace BubbleFeature.Menu
             LoadControls(); // apply saved custom buttons before anything uses the actions
             canvas.gameObject.SetActive(false);
             buttonTemplate.gameObject.SetActive(false);
-            backButton.onClick.AddListener(() => onBack?.Invoke());
+            backButton.onClick.AddListener(() => { DemoAudio.Play(Sfx.Click); onBack?.Invoke(); });
         }
 
         private void OnEnable()
@@ -132,6 +139,7 @@ namespace BubbleFeature.Menu
         {
             PlaceInFrontOfPlayer();
             canvas.gameObject.SetActive(true);
+            DemoAudio.Play(Sfx.MenuOpen);
             ShowMain();
         }
 
@@ -140,6 +148,7 @@ namespace BubbleFeature.Menu
             if (rebinding != null) rebinding.Cancel();
             canvas.gameObject.SetActive(false);
             SetMarker(null);
+            if (playerAvatar != null) playerAvatar.HidePreview();
             chosenBot = null; chosenItem = null; chosenMessage = null;
         }
 
@@ -157,11 +166,18 @@ namespace BubbleFeature.Menu
 
         private void ShowMain()
         {
+            if (playerAvatar != null) playerAvatar.HidePreview();
             ShowScreen("B&D City", null);
             AddOption("Send gift", ShowRecipients);
             if (teleporter != null) AddOption("Go to...", ShowGoTo);
-            AddOption("Change outfit (soon)", null);
+            if (playerAvatar != null && playerAvatar.BodyCount > 0) AddOption("Change outfit", ShowOutfit);
+            else AddOption("Change outfit (soon)", null);
             AddOption("Controls", ShowControls);
+            if (tutorial != null)
+            {
+                if (tutorial.IsRunning) AddOption("Skip tutorial", () => { Close(); tutorial.Skip(); });
+                else AddOption("Replay tutorial", () => { Close(); tutorial.Play(); });
+            }
             AddOption("Close", Close);
         }
 
@@ -237,6 +253,37 @@ namespace BubbleFeature.Menu
             ShowScreen($"Sent to {to}!", null);
             AddOption("Send another", ShowRecipients);
             AddOption("Close", Close);
+        }
+
+        // ---------- Outfit (with a mirror copy of your avatar) ----------
+
+        private void ShowOutfit()
+        {
+            if (!playerAvatar.PreviewVisible && Camera.main != null) playerAvatar.ShowPreview(Camera.main.transform);
+            var w = playerAvatar.Wardrobe;
+            ShowScreen("Change outfit\n<size=65%>Look at your mirror on the right</size>", ShowMain);
+            if (playerAvatar.BodyCount > 1) AddOption($"Body:  {playerAvatar.BodyLabel}  >", () => { playerAvatar.NextBody(); ShowOutfit(); });
+            if (w == null) return;
+            foreach (var slot in w.Slots)
+            {
+                string n = slot.name;
+                if (slot.options.Length > 1) AddOption($"{n}:  {w.Describe(n)}  >", () => { w.Next(n); ShowOutfit(); });
+            }
+            AddOption("Colours...", ShowColours);
+            AddOption("Surprise me!", () => { w.Randomize(); ShowOutfit(); });
+        }
+
+        private void ShowColours()
+        {
+            var w = playerAvatar.Wardrobe;
+            ShowScreen("Colours", ShowOutfit);
+            if (w == null) return;
+            foreach (var slot in w.Slots)
+            {
+                string n = slot.name;
+                var o = slot.options[slot.current];
+                if (o.colours != null && o.colours.Length > 0) AddOption($"{n} colour  >", () => { w.NextColour(n); ShowColours(); });
+            }
         }
 
         // ---------- City: travel between neighbourhoods ----------
@@ -352,7 +399,7 @@ namespace BubbleFeature.Menu
             button.gameObject.SetActive(true);
             button.GetComponentInChildren<TMP_Text>().text = label;
             button.interactable = onClick != null;
-            if (onClick != null) button.onClick.AddListener(() => onClick());
+            if (onClick != null) button.onClick.AddListener(() => { DemoAudio.Play(Sfx.Click); onClick(); });
             if (tint.HasValue)
             {
                 ColorBlock colors = button.colors;

@@ -20,6 +20,8 @@ namespace CityFeature
         [SerializeField] private float giftBubbleDelay = 1.5f;
         [Tooltip("Off = only the first neighbourhood you arrive in gets a gift bubble.")]
         [SerializeField] private bool giftBubbleEveryArrival = true;
+        [Tooltip("While the tutorial runs, it sends the gift bubble itself (as one of its steps).")]
+        [SerializeField] private TutorialGuide tutorial;
 
         private bool gaveFirstGift;
 
@@ -47,6 +49,7 @@ namespace CityFeature
         private void OnRevealed(string neighbourhood)
         {
             if (giftBubbles == null) return;
+            if (tutorial != null && (tutorial.IsRunning || tutorial.WillAutoStart)) return;
             if (!giftBubbleEveryArrival && gaveFirstGift) return;
             gaveFirstGift = true;
             StartCoroutine(SpawnGiftLater());

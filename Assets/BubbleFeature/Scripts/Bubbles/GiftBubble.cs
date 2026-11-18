@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using BubbleFeature.Gifts;
+using BubbleFeature.Audio;
 
 namespace BubbleFeature.Bubbles
 {
@@ -141,6 +142,7 @@ namespace BubbleFeature.Bubbles
             if (flight != null) flight.Stop();
             foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
 
+            DemoAudio.Play(Sfx.Pop, transform.position);
             SpawnPopEffect();
             Popped?.Invoke(this);
             StartCoroutine(PopRoutine());

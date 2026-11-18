@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using BubbleFeature.Gifts;
+using BubbleFeature.Audio;
 
 namespace BubbleFeature.Bubbles
 {
@@ -128,6 +129,7 @@ namespace BubbleFeature.Bubbles
         private void OnMessageReady(GiftData gift, Vector3 position)
         {
             if (revealPrefab == null || gift == null) return;
+            DemoAudio.Play(Sfx.Sparkle, position);
 
             if (currentReveal != null) Destroy(currentReveal.gameObject); // one reveal at a time
 

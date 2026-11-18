@@ -19,7 +19,8 @@ namespace CityFeature.EditorTools
         {
             foreach (var n in Names)
             {
-                string png = $"{Folder}/XTree_{n}.png";
+                // Prefer the flattened (posterized, solid-crown) version made for Quest; the original stays next to it.
+                string png = System.IO.File.Exists($"{Folder}/XTree_{n}_flat.png") ? $"{Folder}/XTree_{n}_flat.png" : $"{Folder}/XTree_{n}.png";
                 var imp = (TextureImporter)AssetImporter.GetAtPath(png);
                 imp.textureType = TextureImporterType.Default;
                 imp.alphaIsTransparency = true;
@@ -27,7 +28,8 @@ namespace CityFeature.EditorTools
                 imp.mipMapsPreserveCoverage = true;
                 imp.alphaTestReferenceValue = 0.5f;
                 imp.wrapMode = TextureWrapMode.Clamp;
-                imp.maxTextureSize = 1024;
+                imp.maxTextureSize = 512;
+                imp.npotScale = TextureImporterNPOTScale.None; // keep the real width: the mesh uses the picture's proportions
                 imp.sRGBTexture = true;
                 imp.SaveAndReimport();
                 var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(png);

@@ -33,6 +33,12 @@ namespace BubbleFeature.Bots
         [SerializeField] private string[] femaleNames = { "Sanne", "Noor", "Fatima" };
         [Tooltip("Renderer whose first material gets the bot colour (her jacket).")]
         [SerializeField] private string femaleTopRendererName = "Jacket";
+        [Header("Avatar bots (MakeHuman + wardrobe, random outfit each)")]
+        [Tooltip("If filled, male names use a random one of these instead of Bot Prefab.")]
+        [SerializeField] private BotWanderer[] maleAvatars;
+        [Tooltip("If filled, female names use a random one of these instead of Female Bot Prefab.")]
+        [SerializeField] private BotWanderer[] femaleAvatars;
+
         [Tooltip("Off in the city: SpawnAround() is called when you arrive in a neighbourhood.")]
         [SerializeField] private bool spawnOnStart = true;
 
@@ -141,13 +147,19 @@ namespace BubbleFeature.Bots
             for (int i = 0; i < botNames.Length; i++)
             {
                 if (!TryFindSpot(center, out Vector3 position)) continue;
-                bool female = femaleBotPrefab != null && System.Array.IndexOf(femaleNames, botNames[i]) >= 0;
-                BotWanderer bot = Instantiate(female ? femaleBotPrefab : botPrefab, position, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f), transform);
+                bool isFemaleName = System.Array.IndexOf(femaleNames, botNames[i]) >= 0;
+                BotWanderer[] pool = isFemaleName ? femaleAvatars : maleAvatars;
+                bool avatar = pool != null && pool.Length > 0;
+                bool female = !avatar && femaleBotPrefab != null && isFemaleName;
+                BotWanderer prefab = avatar ? pool[Random.Range(0, pool.Length)] : female ? femaleBotPrefab : botPrefab;
+                BotWanderer bot = Instantiate(prefab, position, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f), transform);
                 bot.SetWalkMode(useNavMesh, wanderRadius);
                 bot.SetName(botNames[i]);
                 Color color = Color.HSVToRGB((float)i / botNames.Length, 0.55f, 0.9f);
                 bot.SetColor(color);
-                if (female) ColourTop(bot.gameObject, color);
+                var wardrobe = avatar ? bot.GetComponentInChildren<CharacterFeature.AvatarWardrobe>() : null;
+                if (wardrobe != null) wardrobe.Randomize(false);
+                else if (female) ColourTop(bot.gameObject, color);
                 else if (shirtMaterials != null && shirtMaterials.Length > 0) Dress(bot.gameObject, shirtMaterials[i % shirtMaterials.Length]);
                 else Tint(bot.gameObject, color);
                 bots.Add(bot);
