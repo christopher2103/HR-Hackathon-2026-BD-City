@@ -271,20 +271,12 @@ PrefabInstance:
       objectReference: {fileID: 1954429629}
     - target: {fileID: 6797418524302580654, guid: 3326f86825ffc6f4eb964342ec6396b8, type: 3}
       propertyPath: clothingOptions.Array.size
-      value: 4
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6797418524302580654, guid: 3326f86825ffc6f4eb964342ec6396b8, type: 3}
       propertyPath: accessoryOptions.Array.size
       value: 5
       objectReference: {fileID: 0}
-    - target: {fileID: 6797418524302580654, guid: 3326f86825ffc6f4eb964342ec6396b8, type: 3}
-      propertyPath: 'clothingOptions.Array.data[2]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 046e2f1e452dd8b49b1f9e42f1edec28, type: 2}
-    - target: {fileID: 6797418524302580654, guid: 3326f86825ffc6f4eb964342ec6396b8, type: 3}
-      propertyPath: 'clothingOptions.Array.data[3]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 6a38dbec9c442454bac86ce69b0a1b80, type: 2}
     - target: {fileID: 6797418524302580654, guid: 3326f86825ffc6f4eb964342ec6396b8, type: 3}
       propertyPath: 'accessoryOptions.Array.data[4]'
       value: 
@@ -1564,9 +1556,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 70e817505c702aa449e8b01efd13678a, type: 2}
   - {fileID: 11400000, guid: 4d247b9546b2f5144973146e25397eaa, type: 2}
   - {fileID: 11400000, guid: 324e1283b91fbbb4ba42d7cd2d3bd32e, type: 2}
-  - {fileID: 11400000, guid: baffef053cded714c82210aee353b325, type: 2}
   - {fileID: 11400000, guid: f972e518837a49e4fa3924902a5cb767, type: 2}
-  - {fileID: 11400000, guid: 24159f0e2bdf68444b7a55736828fd2a, type: 2}
   - {fileID: 11400000, guid: c931c940ab042424e96ed6534250e246, type: 2}
   - {fileID: 11400000, guid: 01ab51264dfa68c4886143b9684b46d3, type: 2}
   - {fileID: 11400000, guid: dca3e3742fac2e249a1b6926be2fc7f5, type: 2}
@@ -2973,13 +2963,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1954429628}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.12484298, y: -0, z: -0, w: 0.9921766}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -14.343, y: 0, z: 0}
 --- !u!1 &2088380553
 GameObject:
   m_ObjectHideFlags: 0

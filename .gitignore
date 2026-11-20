@@ -112,3 +112,9 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Too large for GitHub (201 MB, limit is 100 MB); the fashion site works without it
+fashion-site/3d/obj+BASE+BALL+CAP.obj
+
+# Downloaded models without clear licences, kept locally only
+_removed_unlicensed/

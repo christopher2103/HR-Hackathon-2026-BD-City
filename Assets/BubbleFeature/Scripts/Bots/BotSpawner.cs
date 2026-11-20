@@ -157,6 +157,7 @@ namespace BubbleFeature.Bots
                 bot.SetName(botNames[i]);
                 Color color = Color.HSVToRGB((float)i / botNames.Length, 0.55f, 0.9f);
                 bot.SetColor(color);
+                BotNameTag.Attach(bot);
                 var wardrobe = avatar ? bot.GetComponentInChildren<CharacterFeature.AvatarWardrobe>() : null;
                 if (wardrobe != null) wardrobe.Randomize(false);
                 else if (female) ColourTop(bot.gameObject, color);

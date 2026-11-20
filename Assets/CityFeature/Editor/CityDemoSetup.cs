@@ -11,7 +11,7 @@ namespace CityFeature.EditorTools
     /// <summary>
     /// One-click demo polish for CityScene (each step re-runnable):
     ///  Audio (sound effects + area ambience), arrival titles, demo operator, comfort vignette,
-    ///  warm afternoon light + haze, Quest render settings, extra gifts from "Potential Gifts".
+    ///  warm afternoon light + haze, Quest render settings, extra gifts from "Potential Gifts" (only the scanned cap; downloaded clothing without a clear licence was removed).
     /// </summary>
     public static class CityDemoSetup
     {
@@ -222,22 +222,14 @@ namespace CityFeature.EditorTools
         {
             Directory.CreateDirectory(GiftModels);
             var cap = MakeGiftPrefab("NY_Cap", PG + "newyork cap.fbx", PG + "New York Cap_1.png");
-            var top = MakeGiftPrefab("OffShoulder_Top", PG + "The low poly models only/OffTheShoulderShirt.fbx",
-                PG + "off-the-shoulder-shirt-ngchipv/textures/M_OffTheShoulderShirt_Base_color.png");
-            var blouse = MakeGiftPrefab("Blue_Blouse", PG + "[does not work i think] blue-blouse-with-stripes-3d-scanning/source/Blusa_azl low final/Blusa_azl low final.obj",
-                PG + "[does not work i think] blue-blouse-with-stripes-3d-scanning/textures/bluss_2.png");
 
             var gifts = new List<GiftData>
             {
                 Data("Gifts/Gift_NY_Cap", "Daan", "A cap for sunny days on the Maas!", GiftItemType.Accessory, cap),
-                Data("Gifts/Gift_OffShoulder_Top", "Sanne", "Saw this on the Lijnbaan and thought of you!", GiftItemType.Clothing, top),
-                Data("Gifts/Gift_Blue_Blouse", "Noor", "Stripes suit you!", GiftItemType.Clothing, blouse),
             };
             var items = new List<GiftData>
             {
                 Data("Gifts/Items/Item_NY_Cap", "You", "", GiftItemType.Accessory, cap),
-                Data("Gifts/Items/Item_OffShoulder_Top", "You", "", GiftItemType.Clothing, top),
-                Data("Gifts/Items/Item_Blue_Blouse", "You", "", GiftItemType.Clothing, blouse),
             };
 
             // Bubble spawner: mix the new gifts in after the first (message-only) one.
@@ -264,11 +256,9 @@ namespace CityFeature.EditorTools
             var menu = Find<BubbleFeature.Menu.GiftMenu>();
             var mso = new SerializedObject(menu);
             AddUnique(mso.FindProperty("accessoryOptions"), items[0]);
-            AddUnique(mso.FindProperty("clothingOptions"), items[1]);
-            AddUnique(mso.FindProperty("clothingOptions"), items[2]);
             mso.ApplyModifiedProperties();
             AssetDatabase.SaveAssets();
-            return $"Gifts: cap, off-the-shoulder top, blue blouse added (spawner now {ordered.Count} gifts)";
+            return $"Gifts: cap added (spawner now {ordered.Count} gifts)";
         }
 
         static void AddUnique(SerializedProperty arr, Object o)
